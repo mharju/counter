@@ -78,23 +78,24 @@
   const handleCounterMessage = ({ counter, notification }) => {
       let count = document.getElementById('count');
       let text = count.querySelector('text');
+      let parentWidth = text.parentNode.getBoundingClientRect().width
       count.className = 'ready';
 
-      countUp(text, 0, counter);
+      countUp(text, 0, counter, parentWidth);
 
       if (notification) {
 	socket.send('ok');
       }
   };
 
-  const countUp = (element, current, to) => {
+  const countUp = (element, current, to, parentWidth) => {
      element.innerHTML = current;
      let bounds = element.getBoundingClientRect();
-     element.setAttribute('x', (300 - bounds.width) / 2);
+     element.setAttribute('x', (parentWidth - bounds.width) / 2);
 
      if (current < to) {
        window.requestAnimationFrame(() => {
-          countUp(element, Math.min(current + 2, to), to);
+          countUp(element, Math.min(current + 2, to), to, parentWidth);
        });
      }
   };
