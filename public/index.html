@@ -1,0 +1,112 @@
+<!doctype html>
+<link rel="stylesheet" href="css/nightclub.css" />
+<style type="text/css">
+  @font-face { font-family: Inter;
+               font-weight: 400;
+               src: url('css/Inter-Light.ttf'); }
+  @font-face { font-family: Inter;
+               font-weight: 500;
+               src: url('css/Inter-Medium.ttf'); }
+
+  :root {
+    --text-color: var(--nightclub9);
+    --background: linear-gradient(225deg, var(--nightclub1), var(--nightclub3));
+  }
+
+  body {
+    padding: 0;
+    margin: 0;
+    font-family: "Inter";
+    font-weight: 400;
+    background: var(--background);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+  }
+  h1 {
+    margin-top: 4rem;
+    font-size: 3rem;
+    font-weight: 500;
+    text-align: center;
+    display: block;
+  }
+  #count {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  #count.ready {
+    transform: translateY(0);
+    opacity: 1;
+    transition: all ease-out 500ms;
+  }
+  svg circle {
+    fill: none;
+    stroke: var(--text-color);
+    stroke-width: 4;
+  }
+  svg text {
+    font-size: 8rem;
+    font-family: Inter;
+    font-weight: 400;
+    fill: var(--text-color);
+  }
+</style>
+<script type="text/javascript">
+  window.addEventListener('load', () => {
+  });
+
+  const socket = new WebSocket('ws://localhost:6464/counter/stream');
+  socket.onopen = () => {
+    console.log('Connected.');
+    socket.send('count');
+  };
+  socket.onmessage = (e) => {
+    if (typeof e.data === 'string') {
+      handleCounterMessage(JSON.parse(e.data));
+    } else {
+      let fr = new FileReader();
+      fr.onload = () => {
+	  handleCounterMessage(JSON.parse(fr.result));
+      };
+      fr.readAsText(e.data);
+    }
+
+  };
+
+  const handleCounterMessage = ({ counter, notification }) => {
+      let count = document.getElementById('count');
+      let text = count.querySelector('text');
+      count.className = 'ready';
+
+      countUp(text, 0, counter);
+
+      if (notification) {
+	socket.send('ok');
+      }
+  };
+
+  const countUp = (element, current, to) => {
+     element.innerHTML = current;
+     let bounds = element.getBoundingClientRect();
+     element.setAttribute('x', (300 - bounds.width) / 2);
+
+     if (current < to) {
+       window.requestAnimationFrame(() => {
+          countUp(element, Math.min(current + 2, to), to);
+       });
+     }
+  };
+</script>
+<body>
+  <div id="count">
+    <svg viewBox="0 0 300 300" width=300 height=300>
+      <circle cx="150" cy="150" r="148" />
+      <text x="60" y="198">0</text>
+    <svg>
+    <h1>tuhistusta</h1>
+  </div>
+</body>
